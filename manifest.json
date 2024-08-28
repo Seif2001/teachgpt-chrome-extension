@@ -4,6 +4,12 @@
     "version": "1.0",
     "permissions": ["activeTab", "scripting", "tabs"],
     "description": "Use this extension to generate questions about any text or topic.",
+    "content_scripts": [
+      {
+        "js": ["scripts/content.js"],
+        "matches": ["https://chatgpt.com/*"]
+      }
+    ],
     "icons": {
       "16": "images/icon-16.png",
       "32": "images/icon-32.png",
@@ -24,12 +30,7 @@
     },
     "host_permissions": [
       "https://chatgpt.com/*"
-    ],
-    "content_scripts": [
-      {
-        "js": ["scripts/content.js"],
-        "matches": ["https://chatgpt.com/*"]
-      }
     ]
+    
   }
   

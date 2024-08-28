@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "teachgpt-chrome-extension",
+			"path": ".."
+		},
+		{
+			"name": "images",
+			"path": "../../Chrome-extension-tut/images"
+		}
+	],
+	"settings": {}
+}

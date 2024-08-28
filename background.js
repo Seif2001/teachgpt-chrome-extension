@@ -1,3 +1,5 @@
+let started = true;
+
 chrome.runtime.onInstalled.addListener(async() => {
     chrome.action.setBadgeText({
       text: "OFF"
@@ -8,7 +10,10 @@ chrome.runtime.onInstalled.addListener(async() => {
   const chatgpt = 'https://chatgpt.com/';
   
   chrome.action.onClicked.addListener(async (tab) => {
-    await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ["scripts/content.js"]});
+    if (tab.url.startsWith(chatgpt) && !started) {
+      await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ["scripts/content.js"]});
+      started = true;
+    }
 
     if (tab.url.startsWith(chatgpt)) {
         const prevState = await chrome.action.getBadgeText({ tabId: tab.id });
@@ -22,6 +27,7 @@ chrome.runtime.onInstalled.addListener(async() => {
             chrome.tabs.sendMessage(tab.id, { action: "start" });
         }
         else{
+          started = false;
         chrome.tabs.sendMessage(tab.id, { action: "stop" });
         }   
     }
