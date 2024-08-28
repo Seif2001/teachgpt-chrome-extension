@@ -170,6 +170,7 @@
     let index = 0;
     let answers;
     let checking = false;
+    let correctAnswers = 0;
     const generateQuestions = () => {
         let prompt = `Generate JSON for 2 questions about the following text: poems, generate the json and the json only without any other text. and the json should be in text format not inside a code block in the following format:
         {
@@ -241,7 +242,7 @@
                 updateCarousel();
             }
         };
-
+        
         const updateCarousel = () => {
             console.log(answers);
             console.log(index);
@@ -259,7 +260,7 @@
                                 !checking ? 
                                 `<input  ${Number(answers[index]) === i ? 'checked' : ''} type="radio" name="choices" value="${i}" style="margin-right: 8px;"> ${choice}` : 
                                 `<input ${Number(answers[index]) === i ? 'checked' : ''} disabled type="radio" name="choices" value="${i}" 
-                                style="margin-right: 8px;${ questions[index].correctChoice === i  ? 'color:green' : ''} " > ${choice}`
+                                style="margin-right: 8px;${ questions[index].correctChoice === i  ? 'border: 2px solid green;' : ''} " > ${choice}`
                                 }
                             </label>`
                           )
@@ -292,6 +293,7 @@
                         transition: background 0.3s ease;
                         display: none;
                     ">Check Answers</button>
+                    <h3 style="margin: 0;">${!checking ? `${index + 1} of ${questions.length}` : `${correctAnswers} of ${questions.length}`}</h3>
                     <button class="btn" id="nextBtn" style="
                         background: #007aff;
                         color: #fff;
@@ -304,8 +306,9 @@
                     ">Next</button>
                     
                 </div>`;
+            const checkAnswersBtn = document.getElementById('submitBtn');
+            checkAnswersBtn.addEventListener('click', checkAnswers);
 
-                
             const redBox = document.getElementsByClassName("red-box")[0];
             if (redBox) {
                 redBox.appendChild(carousel);
@@ -315,13 +318,25 @@
             nextBtn.addEventListener('click', nextSlide);
             prevBtn.addEventListener('click', prevSlide);
             const totalSlides = questions.length;
-            if (index === totalSlides - 1) {
-                let checkAnswersBtn = document.getElementById('submitBtn');
-                checkAnswersBtn.style.display = 'block';
-                checkAnswersBtn.addEventListener('click', checkAnswers);
 
+            if (index === totalSlides - 1 && !checking) {
+                index = 0;
+                checkAnswersBtn.style.display = "block";
             }
+            
         };
+        const checkAnswers = () => {
+            checking = true;
+            updateCarousel();
+            correctAnswers = 0;
+            questions.forEach((question, i) => {
+                if (Number(question.correctChoice) === Number(answers[i])) {
+                    correctAnswers++;
+                }
+            });
+            console.log(correctAnswers);
+        };
+       
         updateCarousel();
     };
 
@@ -363,15 +378,21 @@
         console.log(waitDiv);
         const observer = new MutationObserver((mutations) => {
             for (let mutation of mutations) {
-              if (waitDiv.innerText.trim() === '') {
-                observer.disconnect(); // Stop observing when there's no text
-                getResponse();
-              }
+              if (waitDiv.innerText.trim() === ''){
+                
+                setTimeout(() => {
+                    if (waitDiv.innerText.trim() === '') {
+                        observer.disconnect(); // Stop observing when there's no text
+                        getResponse(); // Check again after 2 seconds
+                    }
+                }, 2000); // Wait for 2 seconds
+            }
             }
           });
           
           // Start observing the element for changes to its child nodes and text content
           observer.observe(waitDiv, { childList: true, subtree: true, characterData: true });
+          
         
     }
 
@@ -379,9 +400,5 @@
     
     
 
-    const checkAnswers = () => {
-        checking = true;
-        updateCarousel();
-        console.log(answers);
-    };
+    
 })();
