@@ -31,7 +31,7 @@
     redBoxCreated.appendChild(header);
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         let existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
-        responseArea = document.getElementsByClassName('h-full')[10];
+        responseArea = document.getElementsByClassName('h-full')[9];
         console.log(responseArea);
         let historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0];
         choices = document.getElementsByClassName("choices")[0];
@@ -169,6 +169,7 @@
     }
     let index = 0;
     let answers;
+    let checking = false;
     const generateQuestions = () => {
         let prompt = `Generate JSON for 2 questions about the following text: poems, generate the json and the json only without any other text. and the json should be in text format not inside a code block in the following format:
         {
@@ -244,6 +245,7 @@
         const updateCarousel = () => {
             console.log(answers);
             console.log(index);
+            
             carousel = document.getElementsByClassName('carousel-container')[0];
             let carouselContent = `
                 <div class="carousel-slide">
@@ -253,7 +255,12 @@
                           .map(
                             (choice, i) => `
                             <label style="display:block; margin-bottom: 8px;">
-                                <input ${Number(answers[index]) === i ? 'checked' : ''} type="radio" name="choices" value="${i}" style="margin-right: 8px;"> ${choice}
+                                ${
+                                !checking ? 
+                                `<input  ${Number(answers[index]) === i ? 'checked' : ''} type="radio" name="choices" value="${i}" style="margin-right: 8px;"> ${choice}` : 
+                                `<input ${Number(answers[index]) === i ? 'checked' : ''} disabled type="radio" name="choices" value="${i}" 
+                                style="margin-right: 8px;${ questions[index].correctChoice === i  ? 'color:green' : ''} " > ${choice}`
+                                }
                             </label>`
                           )
                           .join('')}
@@ -319,6 +326,7 @@
     };
 
     const getResponse = () => {
+        checking = false;
         let responses = document.getElementsByClassName("w-full text-token-text-primary focus-visible:outline-2 focus-visible:outline-offset-[-4px]");
         let response = responses[responses.length - 1];
         console.log(response.getElementsByTagName("p"));
@@ -350,9 +358,21 @@
         let headerRedBox = redBox.getElementsByTagName("h1")[0];
         headerRedBox.textContent = "Waiting for response...";   
         console.log("Waiting for response...");
-        setTimeout(() => {
-            getResponse();
-        }, 12000);
+        const waitDivs = document.getElementsByClassName("sr-only");
+        let waitDiv = waitDivs[waitDivs.length - 2];
+        console.log(waitDiv);
+        const observer = new MutationObserver((mutations) => {
+            for (let mutation of mutations) {
+              if (waitDiv.innerText.trim() === '') {
+                observer.disconnect(); // Stop observing when there's no text
+                getResponse();
+              }
+            }
+          });
+          
+          // Start observing the element for changes to its child nodes and text content
+          observer.observe(waitDiv, { childList: true, subtree: true, characterData: true });
+        
     }
 
     
@@ -360,6 +380,8 @@
     
 
     const checkAnswers = () => {
+        checking = true;
+        updateCarousel();
         console.log(answers);
     };
 })();
