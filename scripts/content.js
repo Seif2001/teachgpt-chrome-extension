@@ -1,88 +1,8 @@
 (() => {
+
+    
     let started = false;
-    let choices, box, jsonQuestions, responseArea, carousel;
-    // Create a red box div
-    let redBoxCreated = document.createElement("div");
-    redBoxCreated.className = "red-box";
-    redBoxCreated.style.position = "absolute"; // Overlay positioning
-    redBoxCreated.style.left = "50%"; // Center horizontally
-    redBoxCreated.style.transform = "translateX(-50%)"; // Center horizontally
-    redBoxCreated.style.width = "80%"; // Make it wider
-    redBoxCreated.style.maxWidth = "800px"; // Optional: limit the maximum width
-    redBoxCreated.style.minHeight = "80%"; // Minimum height
-    redBoxCreated.style.marginTop = "20px"; // 50px from the top
-    redBoxCreated.style.borderRadius = "10px"; // Rounded corners
-    redBoxCreated.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)"; // Add shadow
-    redBoxCreated.style.zIndex = "1000"; // Ensure it stays on top
-    redBoxCreated.style.backgroundColor = "#D3D3D3"; // Light gray background color
-    redBoxCreated.style.display = "flex"; // Use flexbox for centering
-    redBoxCreated.style.flexDirection = "column";
-    redBoxCreated.style.alignItems = "center";
-    redBoxCreated.style.justifyContent = "center";
-    redBoxCreated.style.padding = "20px"; // Padding for content spacing
-    redBoxCreated.style.textAlign = "center"; // Center text horizontally
-    
-    
-    // Add centered text with big font
-    const header = document.createElement("h1");
-    header.textContent = "Generate questions about a specific topic or text";
-    header.style.fontSize = "24px"; // Big font size
-    header.style.marginBottom = "20px"; // Space below the text
-    redBoxCreated.appendChild(header);
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        let existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
-        responseArea = document.getElementsByClassName('h-full')[9];
-        console.log(responseArea);
-        let historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0];
-        choices = document.getElementsByClassName("choices")[0];
-        
-        if (message.action === "start"&& !started) {
-            started = true;
-            addChoices();
-            if (responseArea && historyArea && existingBox) {
-                // Save original styles
-                originalStyles = {
-                    existingBox: existingBox.style,
-                    responseArea: responseArea.style,
-                    historyArea: historyArea.style
-                };
-                console.log("adding red box");
-                 // Get the parent element of responseArea
-                let parentElement = responseArea.parentElement;
-
-                
-                
-                // Ensure the parent element has a relative position
-                parentElement.style.position = "relative";
-                
-                // Append the red box to the parent element
-                parentElement.appendChild(redBoxCreated);
-                // Apply new styles
-                existingBox.style.display = "none";
-                responseArea.style.display = "none";
-                historyArea.style.display = "none";
-                console.log(responseArea)
-            }
-        } else if (message.action === "stop" && choices) {
-            // started = false;
-            choices.remove();
-            if (responseArea && historyArea && existingBox) {
-                // Restore original styles
-                existingBox.style = originalStyles.existingBox;
-                responseArea.style = originalStyles.responseArea;
-                historyArea.style = originalStyles.historyArea;
-
-                // Remove the red box if it exists
-                const redBox = document.getElementsByClassName("red-box")[0];
-                if (redBox) {
-                    console.log(redBox);
-                    redBox.remove();
-                }
-            }
-        }
-        sendResponse({ status: "OK" });
-    });
-
+    let choices, box, jsonQuestions, responseArea, carousel, originalStyles, existingBox, historyArea, redBox;
     const addChoices = () => {
         const choicesExists = document.getElementsByClassName("choices");
         if (choicesExists.length === 0) {
@@ -166,37 +86,132 @@
                 console.error("Box not found!");
             }
         }
+    };
+    const start = () => {
+        let redBoxCreated = document.createElement("div");
+        redBoxCreated.className = "red-box";
+        redBoxCreated.style.position = "absolute"; // Overlay positioning
+        redBoxCreated.style.left = "50%"; // Center horizontally
+        redBoxCreated.style.transform = "translateX(-50%)"; // Center horizontally
+        redBoxCreated.style.width = "80%"; // Make it wider
+        redBoxCreated.style.maxWidth = "800px"; // Optional: limit the maximum width
+        redBoxCreated.style.minHeight = "80%"; // Minimum height
+        redBoxCreated.style.marginTop = "20px"; // 50px from the top
+        redBoxCreated.style.borderRadius = "10px"; // Rounded corners
+        redBoxCreated.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)"; // Add shadow
+        redBoxCreated.style.zIndex = "1000"; // Ensure it stays on top
+        redBoxCreated.style.backgroundColor = "#D3D3D3"; // Light gray background color
+        redBoxCreated.style.display = "flex"; // Use flexbox for centering
+        redBoxCreated.style.flexDirection = "column";
+        redBoxCreated.style.alignItems = "center";
+        redBoxCreated.style.justifyContent = "center";
+        redBoxCreated.style.padding = "20px"; // Padding for content spacing
+        redBoxCreated.style.textAlign = "center"; // Center text horizontally
+        
+        
+        // Add centered text with big font
+        const header = document.createElement("h1");
+        header.textContent = "Generate questions about a specific topic or text";
+        header.style.fontSize = "24px"; // Big font size
+        header.style.marginBottom = "20px"; // Space below the text
+        redBoxCreated.appendChild(header);
+
+        existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
+        responseArea = document.getElementsByClassName('h-full')[9];
+        console.log(responseArea);
+        historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0];
+        choices = document.getElementsByClassName("choices")[0];
+        if (responseArea && historyArea && existingBox) {
+            addChoices();
+            // Save original styles
+            originalStyles = {
+                existingBox: existingBox.style,
+                responseArea: responseArea.style,
+                historyArea: historyArea.style
+            };
+            console.log("adding red box");
+             // Get the parent element of responseArea
+            let parentElement = responseArea.parentElement;
+
+            
+            
+            // Ensure the parent element has a relative position
+            parentElement.style.position = "relative";
+            
+            // Append the red box to the parent element
+            parentElement.appendChild(redBoxCreated);
+            // Apply new styles
+            existingBox.style.display = "none";
+            responseArea.style.display = "none";
+            historyArea.style.display = "none";
+            console.log(responseArea);
+        }
     }
+
+    const stop = () => {
+        choices.remove();
+        existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
+        responseArea = document.getElementsByClassName('h-full')[9];
+        historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0];
+        if (responseArea && historyArea && existingBox ) {
+            // Restore original styles
+            existingBox.style = originalStyles.existingBox;
+            responseArea.style = originalStyles.responseArea;
+            historyArea.style = originalStyles.historyArea;
+
+            // Remove the red box if it exists
+            redBox = document.getElementsByClassName("red-box")[0];
+            if (redBox) {
+                redBox.remove();
+            }
+        }
+    }
+    
+
+
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        
+        
+        if (message.action === "start"&& !started) {
+            started = true;
+            start();
+            
+        } else if (message.action === "stop") {
+            stop();
+        }
+        sendResponse({ status: "OK" });
+    });
+
+
     let index = 0;
     let answers;
     let checking = false;
     let correctAnswers = 0;
-    const generateQuestions = () => {
-        let prompt = `Generate JSON for 2 questions about the following text: poems, generate the json and the json only without any other text. and the json should be in text format not inside a code block in the following format:
+    let prompt = `Generate JSON for 2 questions about the following text: poems, generate the json and the json only without any other text. and the json should be in text format not inside a code block in the following format:
         {
-   "questions":[
-      {
-         "question":"What is a common feature of haiku poems?",
-         "choices":[
-            "Three lines",
-            "Four stanzas",
-            "Rhyme scheme",
-            "Extended metaphor"
-         ],
-         "correctChoice":0
-      },
-      {
-         "question":"Which poetic form consists of 14 lines with a specific rhyme scheme?",
-         "choices":[
-            "Sonnet",
-            "Limerick",
-            "Free verse",
-            "Ode"
-         ],
-         "correctChoice":0
-      }
-   ]
-}`;
+        "questions":[
+            {
+                "question":"What is a common feature of haiku poems?",
+                "choices":[
+                    "Three lines",
+                    "Four stanzas",
+                    "Rhyme scheme",
+                    "Extended metaphor"
+                ],
+                "correctChoice":0
+            },
+            {
+                "question":"Which poetic form consists of 14 lines with a specific rhyme scheme?",
+                "choices":[
+                    "Sonnet",
+                    "Limerick",
+                    "Free verse",
+                    "Ode"
+                ],
+                "correctChoice":0
+            }
+        ]
+    }`;
     
     const displayCarousel = questions => {
         answers = new Array(questions.length).fill(-1);
@@ -212,14 +227,20 @@
         carouselContainer.style.width = "100%";
         let redBox = document.getElementsByClassName("red-box")[0];
         let headerRedBox = redBox.getElementsByTagName("h1")[0];
-        console.log(redBox)
         headerRedBox.remove();
         redBox.appendChild(carouselContainer);
-
+        const score = document.createElement('h2');
+        score.textContent = `You got ${correctAnswers} out of ${questions.length} questions correct!`;
+        score.style.fontSize = "24px";
+        score.style.display = "none";
+        redBox.appendChild(score);
+        
         const nextSlide = () => {
             const totalSlides = questions.length;
             
             if (index < totalSlides - 1) {
+                const carousel = document.getElementsByClassName('carousel-container')[0];
+
                 const selectedOption = carousel.querySelector('input[name="choices"]:checked');
                 if (selectedOption) {
                     answers[index] = selectedOption.value;
@@ -247,11 +268,11 @@
             console.log(answers);
             console.log(index);
             
-            carousel = document.getElementsByClassName('carousel-container')[0];
+            let carousel = document.getElementsByClassName('carousel-container')[0];
             let carouselContent = `
                 <div class="carousel-slide">
-                    <h3>${questions[index].question}</h3>
-                    <div class="choices" style="display:flex; flex-direction:column; justify-content:space-between; height:25vh; margin:20px">
+                    <h3>${(index+1) + '. '+ questions[index].question}</h3>
+                    <div class="choices" style="display:flex; flex-direction:column; justify-content:space-between; align-items: flex-start; height:25vh; margin:20px">
                         ${questions[index].choices
                           .map(
                             (choice, i) => `
@@ -283,7 +304,7 @@
                         transition: background 0.3s ease;
                     ">Previous</button>
                     <button class="btn" id="submitBtn" style="
-                    background: #007aff;
+                        background: #007aff;
                         color: #fff;
                         padding: 10px 20px;
                         border: none;
@@ -293,7 +314,7 @@
                         transition: background 0.3s ease;
                         display: none;
                     ">Check Answers</button>
-                    <h3 style="margin: 0;">${!checking ? `${index + 1} of ${questions.length}` : `${correctAnswers} of ${questions.length}`}</h3>
+                    
                     <button class="btn" id="nextBtn" style="
                         background: #007aff;
                         color: #fff;
@@ -320,20 +341,35 @@
             const totalSlides = questions.length;
 
             if (index === totalSlides - 1 && !checking) {
-                index = 0;
                 checkAnswersBtn.style.display = "block";
+            }
+
+            
+            if (checking) {
+                score.style.display = "block";
             }
             
         };
         const checkAnswers = () => {
             checking = true;
-            updateCarousel();
             correctAnswers = 0;
+            let carousel = document.getElementsByClassName('carousel-container')[0];
+
+            const selectedOption = carousel.querySelector('input[name="choices"]:checked');
+                if (selectedOption) {
+                    answers[index] = selectedOption.value;
+                    console.log(index);
+                }
+                console.log("Last slide", answers, index, selectedOption);
+            index = 0;
+            
             questions.forEach((question, i) => {
                 if (Number(question.correctChoice) === Number(answers[i])) {
                     correctAnswers++;
                 }
             });
+            
+            updateCarousel();
             console.log(correctAnswers);
         };
        
@@ -357,6 +393,9 @@
     
         displayCarousel(jsonQuestions.questions);
     }
+
+    const generateQuestions = () => {
+
         const inputedText = document.getElementById("prompt-textarea");
         if (inputedText) {
             inputedText.value = prompt;
@@ -369,7 +408,7 @@
         } else {
             console.error("Send button not found!");
         }
-        let redBox = document.getElementsByClassName("red-box")[0];
+        redBox = document.getElementsByClassName("red-box")[0];
         let headerRedBox = redBox.getElementsByTagName("h1")[0];
         headerRedBox.textContent = "Waiting for response...";   
         console.log("Waiting for response...");
@@ -378,23 +417,24 @@
         console.log(waitDiv);
         const observer = new MutationObserver((mutations) => {
             for (let mutation of mutations) {
-              if (waitDiv.innerText.trim() === ''){
+                if (waitDiv.innerText.trim() === ''){
                 
                 setTimeout(() => {
                     if (waitDiv.innerText.trim() === '') {
                         observer.disconnect(); // Stop observing when there's no text
                         getResponse(); // Check again after 2 seconds
                     }
-                }, 2000); // Wait for 2 seconds
+                }, 3000); // Wait for 2 seconds
             }
             }
-          });
-          
-          // Start observing the element for changes to its child nodes and text content
-          observer.observe(waitDiv, { childList: true, subtree: true, characterData: true });
-          
+            });
+            
+        // Start observing the element for changes to its child nodes and text content
+        observer.observe(waitDiv, { childList: true, subtree: true, characterData: true });
+        }
+    
         
-    }
+    
 
     
     
