@@ -170,8 +170,6 @@
 
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        
-        
         if (message.action === "start"&& !started) {
             started = true;
             start();
@@ -187,7 +185,9 @@
     let answers;
     let checking = false;
     let correctAnswers = 0;
-    let prompt = `Generate JSON for 2 questions about the following text: poems, generate the json and the json only without any other text. and the json should be in text format not inside a code block in the following format:
+    let startOfprompt = `Generate JSON for `
+    let midOfPrompt = ` questions about the following text: `
+    let restOfPrompt = `, generate the json and the json only without any other text. and the json should be in text format not inside a code block in the following format:
         {
         "questions":[
             {
@@ -211,7 +211,7 @@
                 "correctChoice":0
             }
         ]
-    }`;
+    }  make sure that the generated output is json and the json only without any other text.`;
     
     const displayCarousel = questions => {
         answers = new Array(questions.length).fill(-1);
@@ -234,7 +234,7 @@
         score.style.fontSize = "24px";
         score.style.display = "none";
         redBox.appendChild(score);
-        
+
         const nextSlide = () => {
             const totalSlides = questions.length;
             
@@ -397,8 +397,33 @@
     const generateQuestions = () => {
 
         const inputedText = document.getElementById("prompt-textarea");
+        const choicesSelect = document.getElementById('choices-select');
+        const numberInput = document.getElementById('number-input');
+        const promptTextarea = document.getElementById('prompt-user-textarea');
+
+        if (!choicesSelect || !numberInput || !promptTextarea) {
+            console.error("One or more form elements are missing!");
+            return;
+        }
+
+        const typeOfQuestions = choicesSelect.value;
+        const numberOfQuestions = parseInt(numberInput.value, 10);
+        const promptText = promptTextarea.value.trim();
+
+        if (isNaN(numberOfQuestions) || numberOfQuestions < 1 || numberOfQuestions > 10) {
+            alert("Please enter a number between 1 and 10.");
+            return;
+        }
+
+        if (!promptText) {
+            alert("Please enter the prompt text.");
+            return;
+        }
+
+        let finalPrompt = startOfprompt + numberOfQuestions+ " "+typeOfQuestions + midOfPrompt + promptText + restOfPrompt;
+
         if (inputedText) {
-            inputedText.value = prompt;
+            inputedText.value = finalPrompt;
             const event = new Event('input', { bubbles: true });
             inputedText.dispatchEvent(event);
         }
