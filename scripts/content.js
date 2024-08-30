@@ -115,9 +115,11 @@
         header.style.fontSize = "26px"; // Big font size
         header.style.marginBottom = "24px"; // Space below the text
         header.style.color = "#004d40"; // Dark teal color
-        redBoxCreated.appendChild(header);
 
         existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
+
+        redBoxCreated.appendChild(header);
+
 
         //responseArea = ;
         responseArea = document.getElementsByClassName("flex flex-col text-sm md:pb-9")[0] ?? document.getElementsByClassName('h-full')[9] ?? document.getElementsByClassName('h-full')[10];
@@ -174,8 +176,14 @@
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === "start"&& !started) {
-            started = true;
-            start();
+            try {
+                started = true;
+                start();
+            }
+            catch(error){
+                alert("An error occured while starting the extension. Please try again.");
+                return;
+            }
             
         } else if (message.action === "stop") {
             stop();
@@ -231,7 +239,6 @@
         carouselContainer.style.borderRadius = "12px";
         carouselContainer.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
         carouselContainer.style.padding = "24px";
-        carouselContainer.style.zIndex = "1001";
         carouselContainer.style.textAlign = "center";
 
         let redBox = document.getElementsByClassName("red-box")[0];
@@ -239,6 +246,7 @@
         headerRedBox.style.display = "none";
         redBox.appendChild(carouselContainer);
 
+   
         const nextSlide = () => {
             const totalSlides = questions.length;
             
@@ -275,13 +283,14 @@
             let carousel = document.getElementsByClassName('carousel-container')[0];
             let carouselContent = `
                 <div class="carousel-slide">
-                    <h3>${(index+1) + '. '+ questions[index].question}</h3>
+                    <h3 style="color: #004d40">${(index+1) + '. '+ questions[index].question} </h3>
                     <div class="choices" style="display:flex; flex-direction:column; justify-content:space-between; align-items: flex-start; height:25vh; margin:20px">
                         ${questions[index].choices
                           .map(
                             (choice, i) => `
-                            
-                            <label style = "display: flex; align-items: center; margin-bottom: 8px; background: linear-gradient(135deg, #4a90e2, #007aff); cursor:pointer; width:100%; box-sizing: border-box; padding: 8px; text-align: left; border-radius:10px">
+                            ${checking &&  questions[index].correctChoice === i ?
+                            '<label style = "display: flex; align-items: center; margin-bottom: 8px; background: green; cursor:pointer; width:100%; box-sizing: border-box; padding: 8px; text-align: left; border-radius:10px; color:black;">'
+                            :  '<label style = "display: flex; align-items: center; margin-bottom: 8px; background: #A0C8C8; cursor:pointer; width:100%; box-sizing: border-box; padding: 8px; text-align: left; border-radius:10px; color:black;">'}
                                 ${
                                 !checking ? 
                                 `<input  ${Number(answers[index]) === i ? 'checked' : ''} type="radio" name="choices" value="${i}" style="margin-right: 8px; "> ${choice}` : 
@@ -296,9 +305,10 @@
 
             carousel.innerHTML = `
                 <div class="carousel">${carouselContent}</div>
+                <div class="btn-score" style="display: flex; flex-direction:column; justify-content: space-between; align-items: center; margin-top: 20px;">
                 <div class="btn-container" style="text-align: center; margin-top: 20px; display: flex; justify-content: space-around">
                     <button class="btn" id="prevBtn" style="
-                        background: #007aff;
+                        background: #004d40;
                         color: #fff;
                         padding: 10px 20px;
                         border: none;
@@ -309,7 +319,7 @@
                         transition: background 0.3s ease;
                     ">Previous</button>
                     <button class="btn" id="submitBtn" style="
-                        background: #007aff;
+                        background: #004d40;
                         color: #fff;
                         padding: 10px 20px;
                         border: none;
@@ -317,10 +327,12 @@
                         font-size: 14px;
                         cursor: pointer;
                         transition: background 0.3s ease;
+                        margin-right: 10px;
+
                         display: none;
                     ">Check Answers</button>
                     <button class = "btn" id="resetBtn" style="
-                    background: #007aff;
+                    background: #004d40;
                         color: #fff;
                         padding: 10px 20px;
                         border: none;
@@ -329,9 +341,10 @@
                         cursor: pointer;
                         transition: background 0.3s ease;
                         display: none;
-                    ">Reset Questions</button>
-                    <button class="btn" id="nextBtn" style="
-                        background: #007aff;
+                        margin-right: 10px;
+                        ">Reset Questions</button>
+                        <button class="btn" id="nextBtn" style="
+                        background: #004d40;
                         color: #fff;
                         padding: 10px 20px;
                         border: none;
@@ -341,7 +354,11 @@
                         transition: background 0.3s ease;
                     ">Next</button>
                     
-                </div>`;
+                </div>
+                <h1 class="score" style="display:${checking? 'block' : 'none'}; font-size: 26px; margin-top: 20px; color: #004d40;"></h1>
+                </div>
+                `;
+            score = document.getElementsByClassName('score')[0];
             const checkAnswersBtn = document.getElementById('submitBtn');
             checkAnswersBtn.addEventListener('click', checkAnswers);
             const resetBtn = document.getElementById('resetBtn');
@@ -367,11 +384,11 @@
             if (index === totalSlides - 1 && !checking) {
                 checkAnswersBtn.style.display = "block";
             }
-
-            score = document.getElementsByTagName('h1')[0];
             if (checking) {
+                
                 score.style.display = "block";
                 resetBtn.style.display = "block";
+                console.log(score)
             }
             else{
                 score.style.display = "none";
@@ -398,14 +415,24 @@
                 }
             });
             
-            updateCarousel();
+            try {
+                updateCarousel();
+            }
+            catch(error){
+                alert("An error occured while generating the questions. Please try again.");
+                return;
+            }
+
             score.textContent = `You got ${correctAnswers} out of ${questions.length} questions correct!`;
-            score = document.getElementsByTagName('h1')[0];
-            score.style.display = "block";
             console.log(correctAnswers);
         };
-       
-        updateCarousel();
+       try {
+            updateCarousel();
+        }
+        catch(error){
+            alert("An error occured while generating the questions. Please try again.");
+            return;
+        }
     };
 
     const getResponse = () => {
@@ -426,9 +453,15 @@
         } catch (error) {
             console.error("Failed to parse response:", error);
         }
-
+        
+        try {
+            displayCarousel(jsonQuestions.questions);
+        }
+        catch(error){
+            alert("An error occured while generating the questions. Please try again.");
+            return;
+        }
     
-        displayCarousel(jsonQuestions.questions);
     }
 
     const generateQuestions = () => {
@@ -488,6 +521,7 @@
         headerRedBox.style.display = "block";
         headerRedBox.textContent = "Waiting for response...";   
         console.log("Waiting for response...");
+        console.log(headerRedBox)
         const waitDivs = document.getElementsByClassName("sr-only");
         let waitDiv = waitDivs[waitDivs.length - 2];
         console.log(waitDiv);

@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Teach GPT",
     "version": "1.0",
-    "permissions": ["activeTab", "scripting", "tabs"],
+    "permissions": ["activeTab", "scripting", "tabs", "webNavigation"],
     "description": "Use this extension to generate questions about any text or topic.",
     "content_scripts": [
       {
@@ -31,6 +31,11 @@
     },
     "host_permissions": [
       "https://chatgpt.com/*"
+    ],
+    "web_accessible_resources": [{
+      "resources": ["scripts/content.js"],
+      "matches": ["<all_urls>"]
+    }
     ]
     
   }

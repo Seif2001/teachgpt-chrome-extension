@@ -1,4 +1,4 @@
-let started = true;
+let started = false;
 
 chrome.runtime.onInstalled.addListener(async() => {
     chrome.action.setBadgeText({
