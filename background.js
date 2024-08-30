@@ -32,5 +32,15 @@ chrome.runtime.onInstalled.addListener(async() => {
         }   
     }
 });
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.status === "ERROR") {
+      chrome.action.setBadgeText({
+        tabId: sender.tab.id,
+        text: "OFF"
+      });
+    }
+  }
+);
  
   

@@ -1,5 +1,5 @@
 (() => {
-
+    let error = false;
     
     let started = false;
     let choices, box, jsonQuestions, responseArea, carousel, originalStyles, existingBox, historyArea, redBox;
@@ -88,6 +88,20 @@
         }
     };
     const start = () => {
+        console.log(document.getElementsByClassName('h-full'));
+        responseArea = document.getElementsByClassName("flex flex-col text-sm md:pb-9")[0] ?? document.getElementsByClassName('h-full')[9] ?? document.getElementsByClassName('h-full')[10] ;
+        historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0] ?? document.getElementsByClassName("flex h-full w-full flex-col px-3")[0];
+        existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
+        console.log(responseArea);
+        console.log(historyArea);
+        console.log(existingBox);
+        if (!responseArea || !existingBox || !historyArea) {
+            alert("Please make sure you are logged in or try again later.")
+            error = true;
+            return;
+            
+        }
+        
         let redBoxCreated = document.createElement("div");
         redBoxCreated.className = "red-box";
         redBoxCreated.style.position = "absolute"; // Overlay positioning
@@ -115,23 +129,21 @@
         header.style.fontSize = "26px"; // Big font size
         header.style.marginBottom = "24px"; // Space below the text
         header.style.color = "#004d40"; // Dark teal color
-
-        existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
-
+        
+        
         redBoxCreated.appendChild(header);
-
-
+        
+        
         //responseArea = ;
-        responseArea = document.getElementsByClassName("flex flex-col text-sm md:pb-9")[0] ?? document.getElementsByClassName('h-full')[9] ?? document.getElementsByClassName('h-full')[10];
-        historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0];
-        choices = document.getElementsByClassName("choices")[0];
-        if (responseArea && historyArea && existingBox) {
+        
+        if (responseArea  && existingBox && historyArea) {
             addChoices();
+            choices = document.getElementsByClassName("choices")[0];
             // Save original styles
             originalStyles = {
                 existingBox: existingBox.style,
                 responseArea: responseArea.style,
-                historyArea: historyArea.style
+                historyArea: historyArea?.style
             };
             console.log("adding red box");
              // Get the parent element of responseArea
@@ -188,7 +200,12 @@
         } else if (message.action === "stop") {
             stop();
         }
-        sendResponse({ status: "OK" });
+        if (error) {
+            sendResponse({ status: "ERROR" });
+        }else{
+
+            sendResponse({ status: "OK" });
+        }
     });
 
 
@@ -495,7 +512,7 @@
         }
 
         let finalPrompt = startOfprompt + numberOfQuestions+ " "+typeOfQuestions + midOfPrompt + promptText + restOfPrompt;
-
+        console.log(finalPrompt);
         if (inputedText) {
             inputedText.value = finalPrompt;
             const event = new Event('input', { bubbles: true });
