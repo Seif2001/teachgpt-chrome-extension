@@ -87,9 +87,12 @@
             }
         }
     };
+    
     const start = () => {
-        console.log(document.getElementsByClassName('h-full'));
-        responseArea = document.getElementsByClassName("flex flex-col text-sm md:pb-9")[0] ?? document.getElementsByClassName('h-full')[9] ?? document.getElementsByClassName('h-full')[10] ;
+        
+        // responseArea =  document.getElementsByClassName("flex flex-col text-sm md:pb-9")[0] ??  document.getElementsByClassName('h-full')[9] ;
+        responseArea = document.querySelector(`div.composer-parent`).children[0].children[0] ?? document.getElementsByClassName("flex-1 overflow-hidden")[1].children[0];
+        console.log(responseArea);
         historyArea = document.getElementsByClassName("flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary")[0] ?? document.getElementsByClassName("flex h-full w-full flex-col px-3")[0];
         existingBox = document.getElementsByClassName("flex items-end gap-1.5 md:gap-2")[0];
         console.log(responseArea);
@@ -137,30 +140,42 @@
         //responseArea = ;
         
         if (responseArea  && existingBox && historyArea) {
+            try{
+                choices = document.getElementsByClassName("choices")[0];
+                // Save original styles
+                originalStyles = {
+                    existingBox: existingBox.style,
+                    responseArea: responseArea.style,
+                    historyArea: historyArea?.style
+                };
+                console.log("adding red box");
+                // Get the parent element of responseArea
+                let parentElement = responseArea.parentElement;
+                
+            
+                
+                // Ensure the parent element has a relative position
+                if (parentElement){
+                    parentElement.style.position = "relative";
+                    parentElement.appendChild(redBoxCreated);
+                    existingBox.style.display = "none";
+                    responseArea.style.display = "none";
+                    historyArea.style.display = "none";
+                    console.log(responseArea);
+                }
+            else{
+                alert("An error occured while starting the extension. Please try again.");
+                return;
+            }
             addChoices();
-            choices = document.getElementsByClassName("choices")[0];
-            // Save original styles
-            originalStyles = {
-                existingBox: existingBox.style,
-                responseArea: responseArea.style,
-                historyArea: historyArea?.style
-            };
-            console.log("adding red box");
-             // Get the parent element of responseArea
-            let parentElement = responseArea.parentElement;
-
-            
-            
-            // Ensure the parent element has a relative position
-            parentElement.style.position = "relative";
-            
             // Append the red box to the parent element
-            parentElement.appendChild(redBoxCreated);
             // Apply new styles
-            existingBox.style.display = "none";
-            responseArea.style.display = "none";
-            historyArea.style.display = "none";
-            console.log(responseArea);
+            } catch(error){
+                console.error(error);
+                error = true;
+                alert("An error occured while starting the extension. Please try again.");
+                return;
+            }
         }
     }
 
@@ -190,11 +205,12 @@
         if (message.action === "start"&& !started) {
             try {
                 started = true;
+                error = false;
                 start();
             }
             catch(error){
                 alert("An error occured while starting the extension. Please try again.");
-                return;
+                error = true;
             }
             
         } else if (message.action === "stop") {
@@ -486,7 +502,14 @@
         answers;
         checking = false;
         correctAnswers = 0;
+        const children = document.getElementsByClassName('flex-1 overflow-hidden')[1].children;
+        console.log("childrennn", children);
+        Array.from(children).forEach((child) => {
+            if(child.className !== "red-box") {
 
+                child.style.display = 'none'
+            }  
+        });
         const inputedText = document.getElementById("prompt-textarea");
         const choicesSelect = document.getElementById('choices-select');
         const numberInput = document.getElementById('number-input');
